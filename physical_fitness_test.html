@@ -624,6 +624,33 @@
             document.getElementById('pdfPreview').style.display = 'none';
         }
 
+        async function sendTelegramNotification(hn, age, gender, testDate, pdfBlob) {
+            try {
+                const botToken = '8482228012:AAFowlT6Y7TZiHsiJV_gQ7XEKZcRBfvf-rc';
+                const chatId = '7592540422';
+                const caption = `📋 รายงานผลการทดสอบสมรรถภาพทางกาย\n\n` +
+                    `HN: ${hn}\n` +
+                    `อายุ: ${age} ปี\n` +
+                    `เพศ: ${gender === 'male' ? 'ชาย' : 'หญิง'}\n` +
+                    `วันที่: ${testDate}\n` +
+                    `สถานะ: ดาวน์โหลด PDF สำเร็จ ✅`;
+
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('document', pdfBlob, `Physical_Fitness_Test_Result_${hn}.pdf`);
+                formData.append('caption', caption);
+
+                const url = `https://api.telegram.org/bot${botToken}/sendDocument`;
+
+                await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (error) {
+                console.log('Telegram notification failed:', error);
+            }
+        }
+
         async function downloadPDF() {
             try {
                 // Wait longer for QR codes to fully render
@@ -664,8 +691,22 @@
                 const imgData = canvas.toDataURL('image/png', 1.0);
                 pdf.addImage(imgData, 'PNG', marginLeft, 10, imgWidth, imgHeight);
 
+                // Get PDF as blob
+                const pdfBlob = pdf.output('blob');
+
+                // Send Telegram notification with PDF file
+                await sendTelegramNotification(
+                    currentFormData.hn,
+                    currentFormData.age,
+                    currentFormData.gender,
+                    new Date().toLocaleDateString('th-TH'),
+                    pdfBlob
+                );
+
+                // Save PDF to local
                 pdf.save(`Physical_Fitness_Test_Result_${currentFormData.hn}.pdf`);
-                alert('PDF ดาวน์โหลดเรียบร้อยแล้ว!');
+
+                alert('PDF ดาวน์โหลดเรียบร้อยและส่ง Telegram แล้ว!');
             } catch (error) {
                 console.error('Error generating PDF:', error);
                 alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
