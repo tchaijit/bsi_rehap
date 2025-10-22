@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Fitness Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header-logo {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .header-info {
+            font-size: 0.9em;
+            margin-top: 15px;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1.05em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #764ba2;
+        }
+
+        .measurement-section {
+            background: #f8f9ff;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .unit {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            margin: 5px 0;
+            color: #1976d2;
+        }
+
+        /* PDF Preview Styles */
+        #pdfPreview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .pdf-content {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+        }
+
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .pdf-header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .pdf-header h2 {
+            color: #764ba2;
+            font-size: 1.5em;
+        }
+
+        .pdf-section {
+            margin-bottom: 30px;
+        }
+
+        .pdf-section h3 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .info-row {
+            padding: 8px 0;
+            font-size: 1.1em;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .result-name {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .result-value {
+            margin: 0 20px;
+            font-weight: 500;
+        }
+
+        .result-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .badge-excellent { background: #4caf50 !important; }
+        .badge-good { background: #8bc34a !important; }
+        .badge-average { background: #ffc107 !important; color: black !important; }
+        .badge-low { background: #ff9800 !important; }
+        .badge-very-low { background: #f44336 !important; }
+
+        .qr-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+
+        .qr-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        #qrcode {
+            margin: 20px auto;
+            display: inline-block;
+        }
+
+        .close-btn {
+            position: sticky;
+            top: 10px;
+            right: 10px;
+            float: right;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .download-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 20px 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9ff;
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.6;
+            border-top: 2px solid #667eea;
+        }
+
+        .footer strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="img/logo.png" class="header-logo" alt="Hospital Logo">
+            <h1>Physical Fitness Test</h1>
+            <p>แบบทดสอบสมรรถภาพทางกาย</p>
+            <div class="header-info">
+                <strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <form id="fitnessForm">
+                <!-- Personal Information -->
+                <h2 class="section-title">ข้อมูลส่วนบุคคล</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="hn">HN (Hospital Number)</label>
+                        <input type="text" id="hn" required maxlength="12" placeholder="HN 10 หลัก (xx-xx-xxxxxx)">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">อายุ (ปี)</label>
+                        <input type="number" id="age" required min="15" max="100" placeholder="อายุ 15-100">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">เพศ</label>
+                        <select id="gender" required>
+                            <option value="">เลือกเพศ</option>
+                            <option value="male">ชาย</option>
+                            <option value="female">หญิง</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">น้ำหนัก (กก.)</label>
+                        <input type="number" id="weight" required min="30" max="200" step="0.01" placeholder="น้ำหนัก 30-200">
+                    </div>
+                </div>
+
+                <!-- Measurement Station -->
+                <div class="measurement-section">
+                    <h2 class="section-title">ค่าการวัดตามสถานี</h2>
+
+                    <div class="info-box">
+                        <p><strong>คำแนะนำ:</strong> กรอกค่าที่วัดได้จากแต่ละสถานีทดสอบ (รองรับทศนิยม 2 ตำแหน่ง)</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="handgrip">Hand Grip <span class="unit">(kg)</span></label>
+                            <input type="number" id="handgrip" required min="5" max="100" step="0.01" placeholder="กำลังมือ 5-100">
+                        </div>
+                        <div class="form-group">
+                            <label for="legstrength">Leg Strength <span class="unit">(kg)</span></label>
+                            <input type="number" id="legstrength" required min="10" max="300" step="0.01" placeholder="กำลังขา 10-300">
+                        </div>
+                        <div class="form-group">
+                            <label for="backstrength">Back Strength <span class="unit">(kg)</span></label>
+                            <input type="number" id="backstrength" required min="10" max="300" step="0.01" placeholder="กำลังหลัง 10-300">
+                        </div>
+                        <div class="form-group">
+                            <label for="flexibility">Flexibility <span class="unit">(cm)</span></label>
+                            <input type="number" id="flexibility" required min="-30" max="50" step="0.01" placeholder="ความยืดหยุ่น -30 ถึง 50">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">สร้างรายงานผล PDF</button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong></p>
+            <p>44 ถนนเฉลิมพระเกียรติ ร.9 ตำบลวิชิต อำเภอเมือง จังหวัดภูเก็ต 83000 ประเทศไทย</p>
+            <p>Tel: +66 76 361 888 | Email: info@phuketinternationalhospital.com</p>
+            <p style="font-size: 0.85em;">Operated by Bangkok Phuket International Hospital Co., Ltd.</p>
+        </div>
+    </div>
+
+    <!-- PDF Preview -->
+    <div id="pdfPreview">
+        <div class="pdf-content">
+            <button class="close-btn" onclick="closePDF()">ปิด</button>
+            <button class="download-btn" onclick="downloadPDF()">ดาวน์โหลด PDF</button>
+            <div id="pdfContentArea"></div>
+        </div>
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        // Fitness evaluation criteria based on age and gender
+        const fitnessCriteria = {
+            handgrip: {
+                male: {
+                    '20-29': { excellent: 54, good: 48, average: 42, low: 36 },
+                    '30-39': { excellent: 52, good: 46, average: 40, low: 34 },
+                    '40-49': { excellent: 48, good: 42, average: 36, low: 30 },
+                    '50-59': { excellent: 44, good: 38, average: 32, low: 26 },
+                    '60+': { excellent: 40, good: 34, average: 28, low: 22 }
+                },
+                female: {
+                    '20-29': { excellent: 32, good: 28, average: 24, low: 20 },
+                    '30-39': { excellent: 30, good: 26, average: 22, low: 18 },
+                    '40-49': { excellent: 28, good: 24, average: 20, low: 16 },
+                    '50-59': { excellent: 26, good: 22, average: 18, low: 14 },
+                    '60+': { excellent: 24, good: 20, average: 16, low: 12 }
+                }
+            },
+            legstrength: {
+                male: {
+                    '20-29': { excellent: 140, good: 120, average: 100, low: 80 },
+                    '30-39': { excellent: 135, good: 115, average: 95, low: 75 },
+                    '40-49': { excellent: 130, good: 110, average: 90, low: 70 },
+                    '50-59': { excellent: 120, good: 100, average: 80, low: 60 },
+                    '60+': { excellent: 110, good: 90, average: 70, low: 50 }
+                },
+                female: {
+                    '20-29': { excellent: 90, good: 75, average: 60, low: 45 },
+                    '30-39': { excellent: 85, good: 70, average: 55, low: 40 },
+                    '40-49': { excellent: 80, good: 65, average: 50, low: 35 },
+                    '50-59': { excellent: 75, good: 60, average: 45, low: 30 },
+                    '60+': { excellent: 70, good: 55, average: 40, low: 25 }
+                }
+            },
+            backstrength: {
+                male: {
+                    '20-29': { excellent: 140, good: 120, average: 100, low: 80 },
+                    '30-39': { excellent: 135, good: 115, average: 95, low: 75 },
+                    '40-49': { excellent: 130, good: 110, average: 90, low: 70 },
+                    '50-59': { excellent: 120, good: 100, average: 80, low: 60 },
+                    '60+': { excellent: 110, good: 90, average: 70, low: 50 }
+                },
+                female: {
+                    '20-29': { excellent: 80, good: 68, average: 56, low: 44 },
+                    '30-39': { excellent: 76, good: 64, average: 52, low: 40 },
+                    '40-49': { excellent: 72, good: 60, average: 48, low: 36 },
+                    '50-59': { excellent: 68, good: 56, average: 44, low: 32 },
+                    '60+': { excellent: 64, good: 52, average: 40, low: 28 }
+                }
+            },
+            flexibility: {
+                male: {
+                    '20-29': { excellent: 20, good: 15, average: 10, low: 5 },
+                    '30-39': { excellent: 18, good: 13, average: 8, low: 3 },
+                    '40-49': { excellent: 16, good: 11, average: 6, low: 1 },
+                    '50-59': { excellent: 14, good: 9, average: 4, low: -1 },
+                    '60+': { excellent: 12, good: 7, average: 2, low: -3 }
+                },
+                female: {
+                    '20-29': { excellent: 24, good: 19, average: 14, low: 9 },
+                    '30-39': { excellent: 22, good: 17, average: 12, low: 7 },
+                    '40-49': { excellent: 20, good: 15, average: 10, low: 5 },
+                    '50-59': { excellent: 18, good: 13, average: 8, low: 3 },
+                    '60+': { excellent: 16, good: 11, average: 6, low: 1 }
+                }
+            }
+        };
+
+        let currentFormData = null;
+        let currentResults = null;
+
+        function getAgeGroup(age) {
+            if (age >= 20 && age <= 29) return '20-29';
+            if (age >= 30 && age <= 39) return '30-39';
+            if (age >= 40 && age <= 49) return '40-49';
+            if (age >= 50 && age <= 59) return '50-59';
+            return '60+';
+        }
+
+        function evaluatePerformance(value, criteria) {
+            if (value >= criteria.excellent) return { level: 'ดีมาก', class: 'excellent' };
+            if (value >= criteria.good) return { level: 'ดี', class: 'good' };
+            if (value >= criteria.average) return { level: 'ปานกลาง', class: 'average' };
+            if (value >= criteria.low) return { level: 'ต่ำ', class: 'low' };
+            return { level: 'ต่ำมาก', class: 'very-low' };
+        }
+
+        function generatePDFContent(formData, results) {
+            const content = `
+                <div style="width: 165mm; margin: 0 auto; padding: 0; box-sizing: border-box; font-family: 'Sarabun', sans-serif;">
+
+                    <!-- Header -->
+                    <div style="text-align: center; margin-bottom: 15px; padding: 15px; background-color: #667eea; color: white;">
+                        <h1 style="font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">รายงานผลการทดสอบสมรรถภาพทางกาย</h1>
+                        <div style="font-size: 11pt; margin: 0;">Physical Fitness Test Report</div>
+                        <div style="font-size: 10pt; margin-top: 5px;"><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong> | Bangkok Hospital Siriroj</div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div style="margin-bottom: 15px; padding: 12px; background-color: #f8f9ff; border: 1px solid #e0e0e0;">
+                        <h3 style="color: #667eea; font-size: 13pt; margin: 0 0 10px 0; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 5px;">ข้อมูลส่วนบุคคล / Personal Information</h3>
+                        <table style="width: 100%; font-size: 11pt; line-height: 1.6; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 5px 10px; width: 50%;"><strong>HN:</strong> ${formData.hn}</td>
+                                <td style="padding: 5px 10px;"><strong>อายุ / Age:</strong> ${formData.age} ปี / years</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px 10px;"><strong>เพศ / Gender:</strong> ${formData.gender === 'male' ? 'ชาย / Male' : 'หญิง / Female'}</td>
+                                <td style="padding: 5px 10px;"><strong>น้ำหนัก / Weight:</strong> ${formData.weight.toFixed(2)} กก. / kg</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding: 5px 10px;"><strong>วันที่ทดสอบ / Test Date:</strong> ${new Date().toLocaleDateString('th-TH')}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Test Results -->
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="color: #667eea; font-size: 13pt; margin: 0 0 10px 0; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 5px;">ผลการทดสอบ / Test Results</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11pt; border: 2px solid #667eea;">
+                            <thead>
+                                <tr style="background-color: #667eea; color: white;">
+                                    <th style="padding: 10px; text-align: left; border: 1px solid #667eea; font-weight: 600;">รายการทดสอบ / Test Item</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #667eea; font-weight: 600;">ผลลัพธ์ / Result</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #667eea; font-weight: 600;">ระดับ / Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">กำลังมือ / Hand Grip</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.handgrip.toFixed(2)} kg</td>
+                                    <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.handgrip.class)}; border: 1px solid #ddd;">${results.handgrip.level}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">กำลังขา / Leg Strength</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.legstrength.toFixed(2)} kg</td>
+                                    <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.legstrength.class)}; border: 1px solid #ddd;">${results.legstrength.level}</td>
+                                </tr>
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">กำลังหลัง / Back Strength</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.backstrength.toFixed(2)} kg</td>
+                                    <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.backstrength.class)}; border: 1px solid #ddd;">${results.backstrength.level}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">ความยืดหยุ่น / Flexibility</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.flexibility.toFixed(2)} cm</td>
+                                    <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.flexibility.class)}; border: 1px solid #ddd;">${results.flexibility.level}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary -->
+                    <div style="margin-bottom: 15px; padding: 12px; background-color: #e3f2fd; border-left: 5px solid #2196f3;">
+                        <div style="font-size: 11pt; font-weight: 600; color: #1565c0;">
+                            ${getSummary(results)}
+                        </div>
+                    </div>
+
+                    <!-- QR Code Section -->
+                    <div style="text-align: center; margin-top: 15px; padding: 15px; background-color: #f8f9ff; border: 1px solid #e0e0e0;">
+                        <h3 style="color: #667eea; font-size: 12pt; margin: 0 0 12px 0; font-weight: 600;">คำแนะนำการดูแลเบื้องต้น</h3>
+                        <table style="width: 100%; margin-top: 10px; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px; border-right: 1px solid #e0e0e0;">
+                                    <p style="font-size: 10pt; margin: 0 0 8px 0; font-weight: 600; color: #667eea;">แรงบีบมือ</p>
+                                    <div id="qrcode-handgrip" style="margin: 5px auto; display: inline-block;"></div>
+                                </td>
+                                <td style="width: 50%; text-align: center; vertical-align: top; padding: 10px;">
+                                    <p style="font-size: 10pt; margin: 0 0 8px 0; font-weight: 600; color: #667eea;">ตรวจสี่อย่าง</p>
+                                    <div id="qrcode-healthcheck" style="margin: 5px auto; display: inline-block;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="text-align: center; margin-top: 15px; padding: 10px; font-size: 9pt; color: #666; border-top: 1px solid #e0e0e0;">
+                        <p style="margin: 0;"><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong> Bangkok Hospital Siriroj</p>
+                        <p style="margin: 5px 0 0 0;">44 ถนนเฉลิมพระเกียรติ ร.9 อำเภอเมือง จังหวัดภูเก็ต 83000 | Tel: +66 76 361 888</p>
+                    </div>
+                </div>
+            `;
+
+            return content;
+        }
+
+        function getBadgeColor(classType) {
+            const colors = {
+                'excellent': '#4caf50',
+                'good': '#8bc34a',
+                'average': '#ffc107',
+                'low': '#ff9800',
+                'very-low': '#f44336'
+            };
+            return colors[classType] || '#666';
+        }
+
+        function getSummary(results) {
+            const excellentCount = Object.values(results).filter(r => r.class === 'excellent').length;
+            const goodCount = Object.values(results).filter(r => r.class === 'good').length;
+
+            if (excellentCount >= 3) {
+                return '<strong>สมรรถภาพโดยรวม: ดีมาก / Overall Fitness Level: Excellent</strong>';
+            } else if (excellentCount + goodCount >= 3) {
+                return '<strong>สมรรถภาพโดยรวม: ดี / Overall Fitness Level: Good</strong>';
+            } else {
+                return '<strong>สมรรถภาพโดยรวม: ควรปรับปรุง / Overall Fitness Level: Needs Improvement</strong>';
+            }
+        }
+
+        function closePDF() {
+            document.getElementById('pdfPreview').style.display = 'none';
+        }
+
+        async function sendTelegramNotification(hn, age, gender, testDate, pdfBlob) {
+            try {
+                const botToken = '8482228012:AAFowlT6Y7TZiHsiJV_gQ7XEKZcRBfvf-rc';
+                const chatId = '7592540422';
+                const caption = `📋 รายงานผลการทดสอบสมรรถภาพทางกาย\n\n` +
+                    `HN: ${hn}\n` +
+                    `อายุ: ${age} ปี\n` +
+                    `เพศ: ${gender === 'male' ? 'ชาย' : 'หญิง'}\n` +
+                    `วันที่: ${testDate}\n` +
+                    `สถานะ: ดาวน์โหลด PDF สำเร็จ ✅`;
+
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('document', pdfBlob, `Physical_Fitness_Test_Result_${hn}.pdf`);
+                formData.append('caption', caption);
+
+                const url = `https://api.telegram.org/bot${botToken}/sendDocument`;
+
+                await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (error) {
+                console.log('Telegram notification failed:', error);
+            }
+        }
+
+        async function downloadPDF() {
+            try {
+                // Wait longer for QR codes to fully render
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const element = document.getElementById('pdfContentArea');
+
+                // Use html2canvas to capture the preview as image first
+                const canvas = await html2canvas(element, {
+                    scale: 3,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    letterRendering: true,
+                    scrollY: -window.scrollY,
+                    scrollX: -window.scrollX,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight,
+                    backgroundColor: '#ffffff'
+                });
+
+                // Calculate dimensions for A4
+                const pageWidth = 210; // A4 width in mm
+                const marginLeft = 20;
+                const marginRight = 25;
+                const imgWidth = pageWidth - marginLeft - marginRight; // 165mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                // Create PDF and add the captured image
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: false
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                pdf.addImage(imgData, 'PNG', marginLeft, 10, imgWidth, imgHeight);
+
+                // Get PDF as blob
+                const pdfBlob = pdf.output('blob');
+
+                // Send Telegram notification with PDF file
+                await sendTelegramNotification(
+                    currentFormData.hn,
+                    currentFormData.age,
+                    currentFormData.gender,
+                    new Date().toLocaleDateString('th-TH'),
+                    pdfBlob
+                );
+
+                // Save PDF to local
+                pdf.save(`Physical_Fitness_Test_Result_${currentFormData.hn}.pdf`);
+
+                alert('PDF ดาวน์โหลดเรียบร้อยและส่ง Telegram แล้ว!');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
+            }
+        }
+
+        // HN auto-format
+        document.getElementById('hn').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            // Format as xx-xx-xxxxxx
+            if (value.length >= 5) {
+                value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4);
+            } else if (value.length >= 3) {
+                value = value.substring(0, 2) + '-' + value.substring(2);
+            }
+
+            e.target.value = value;
+        });
+
+        document.getElementById('fitnessForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Get form data
+            currentFormData = {
+                hn: document.getElementById('hn').value,
+                age: parseInt(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                weight: parseFloat(document.getElementById('weight').value),
+                handgrip: parseFloat(document.getElementById('handgrip').value),
+                legstrength: parseFloat(document.getElementById('legstrength').value),
+                backstrength: parseFloat(document.getElementById('backstrength').value),
+                flexibility: parseFloat(document.getElementById('flexibility').value)
+            };
+
+            // Get age group and criteria
+            const ageGroup = getAgeGroup(currentFormData.age);
+            const genderCriteria = currentFormData.gender;
+
+            // Evaluate each measurement
+            currentResults = {
+                handgrip: evaluatePerformance(currentFormData.handgrip, fitnessCriteria.handgrip[genderCriteria][ageGroup]),
+                legstrength: evaluatePerformance(currentFormData.legstrength, fitnessCriteria.legstrength[genderCriteria][ageGroup]),
+                backstrength: evaluatePerformance(currentFormData.backstrength, fitnessCriteria.backstrength[genderCriteria][ageGroup]),
+                flexibility: evaluatePerformance(currentFormData.flexibility, fitnessCriteria.flexibility[genderCriteria][ageGroup])
+            };
+
+            // Generate PDF content
+            const pdfContent = generatePDFContent(currentFormData, currentResults);
+            document.getElementById('pdfContentArea').innerHTML = pdfContent;
+
+            // Generate QR Codes immediately after content is set
+            const qrHandGrip = document.getElementById('qrcode-handgrip');
+            qrHandGrip.innerHTML = '';
+            new QRCode(qrHandGrip, {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/r/personal/tawatchai_ch_bdms_co_th/Documents/BSI/Rehap/%E0%B9%81%E0%B8%A3%E0%B8%87%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD.pdf?csf=1&web=1&e=GZtcn7",
+                width: 100,
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            const qrHealthCheck = document.getElementById('qrcode-healthcheck');
+            qrHealthCheck.innerHTML = '';
+            new QRCode(qrHealthCheck, {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/g/personal/tawatchai_ch_bdms_co_th/EfZ3JgjI60dAjXJKe8dCXoIBglbJomYxLsPx-0S6hOB-eA?e=1C0DWT",
+                width: 100,
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            // Show preview after QR codes are generated
+            document.getElementById('pdfPreview').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
