@@ -359,6 +359,7 @@
 
                     <div class="info-box">
                         <p><strong>คำแนะนำ:</strong> กรอกค่าที่วัดได้จากแต่ละสถานีทดสอบ (รองรับทศนิยม 2 ตำแหน่ง)</p>
+                        <p style="margin-top: 8px;"><strong>หมายเหตุ:</strong> ค่าแรงเหยียดหลัง (Back Strength) จะถูกประเมินโดยใช้ Relative Value (แรงเหยียดหลัง/น้ำหนักตัว)</p>
                     </div>
 
                     <div class="form-grid">
@@ -556,7 +557,7 @@
                                 </tr>
                                 <tr style="background-color: #f9f9f9;">
                                     <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">กำลังหลัง / Back Strength</td>
-                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.backstrength.toFixed(2)} kg</td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.backstrength.toFixed(2)} kg<br><span style="font-size: 0.85em; color: #666;">(Relative: ${(formData.backstrength / formData.weight).toFixed(2)})</span></td>
                                     <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.backstrength.class)}; border: 1px solid #ddd;">${results.backstrength.level}</td>
                                 </tr>
                                 <tr>
@@ -566,6 +567,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div style="margin-top: 8px; padding: 8px; background-color: #f0f7ff; border-left: 3px solid #2196f3; font-size: 9pt;">
+                            <strong>หมายเหตุ:</strong> ค่าแรงเหยียดหลัง (Back Strength) ใช้ Relative Value (ค่าแรง/น้ำหนักตัว) ในการประเมินผล
+                        </div>
                     </div>
 
                     <!-- Summary -->
