@@ -337,7 +337,7 @@
                     </div>
                     <div class="form-group">
                         <label for="age">อายุ (ปี)</label>
-                        <input type="number" id="age" required min="15" max="100" placeholder="อายุ 15-100">
+                        <input type="number" id="age" required min="17" max="100" placeholder="อายุ 17-100">
                     </div>
                     <div class="form-group">
                         <label for="gender">เพศ</label>
@@ -413,18 +413,20 @@
         const fitnessCriteria = {
             handgrip: {
                 male: {
-                    '20-29': { excellent: 54, good: 48, average: 42, low: 36 },
-                    '30-39': { excellent: 52, good: 46, average: 40, low: 34 },
-                    '40-49': { excellent: 48, good: 42, average: 36, low: 30 },
-                    '50-59': { excellent: 44, good: 38, average: 32, low: 26 },
-                    '60+': { excellent: 40, good: 34, average: 28, low: 22 }
+                    '17-19': { excellent: 48.4, good: 45.1, average: 38.4, low: 35.1 },
+                    '20-29': { excellent: 50.5, good: 47.4, average: 41.1, low: 38.0 },
+                    '30-39': { excellent: 51.2, good: 48.0, average: 41.5, low: 38.3 },
+                    '40-49': { excellent: 49.3, good: 46.2, average: 39.9, low: 36.8 },
+                    '50-59': { excellent: 46.3, good: 43.3, average: 37.2, low: 34.2 },
+                    '60+': { excellent: 40.7, good: 37.2, average: 30.1, low: 26.6 }
                 },
                 female: {
-                    '20-29': { excellent: 32, good: 28, average: 24, low: 20 },
-                    '30-39': { excellent: 30, good: 26, average: 22, low: 18 },
-                    '40-49': { excellent: 28, good: 24, average: 20, low: 16 },
-                    '50-59': { excellent: 26, good: 22, average: 18, low: 14 },
-                    '60+': { excellent: 24, good: 20, average: 16, low: 12 }
+                    '17-19': { excellent: 30.8, good: 28.6, average: 24.1, low: 21.9 },
+                    '20-29': { excellent: 32.0, good: 29.7, average: 25.0, low: 22.7 },
+                    '30-39': { excellent: 32.5, good: 30.4, average: 26.1, low: 24.0 },
+                    '40-49': { excellent: 31.2, good: 29.0, average: 24.5, low: 22.3 },
+                    '50-59': { excellent: 29.0, good: 26.9, average: 22.6, low: 20.5 },
+                    '60+': { excellent: 26.4, good: 24.0, average: 19.1, low: 16.7 }
                 }
             },
             legstrength: {
@@ -445,34 +447,38 @@
             },
             backstrength: {
                 male: {
-                    '20-29': { excellent: 140, good: 120, average: 100, low: 80 },
-                    '30-39': { excellent: 135, good: 115, average: 95, low: 75 },
-                    '40-49': { excellent: 130, good: 110, average: 90, low: 70 },
-                    '50-59': { excellent: 120, good: 100, average: 80, low: 60 },
-                    '60+': { excellent: 110, good: 90, average: 70, low: 50 }
+                    '17-19': { excellent: 2.09, good: 1.88, average: 1.45, low: 1.22 },
+                    '20-29': { excellent: 2.07, good: 1.86, average: 1.43, low: 1.21 },
+                    '30-39': { excellent: 1.84, good: 1.65, average: 1.26, low: 1.07 },
+                    '40-49': { excellent: 1.92, good: 1.58, average: 0.89, low: 0.55 },
+                    '50-59': { excellent: 1.86, good: 1.52, average: 0.89, low: 0.49 },
+                    '60+': { excellent: 1.86, good: 1.52, average: 0.89, low: 0.49 }
                 },
                 female: {
-                    '20-29': { excellent: 80, good: 68, average: 56, low: 44 },
-                    '30-39': { excellent: 76, good: 64, average: 52, low: 40 },
-                    '40-49': { excellent: 72, good: 60, average: 48, low: 36 },
-                    '50-59': { excellent: 68, good: 56, average: 44, low: 32 },
-                    '60+': { excellent: 64, good: 52, average: 40, low: 28 }
+                    '17-19': { excellent: 1.26, good: 1.17, average: 0.94, low: 0.83 },
+                    '20-29': { excellent: 1.26, good: 1.08, average: 0.71, low: 0.53 },
+                    '30-39': { excellent: 1.12, good: 0.96, average: 0.63, low: 0.47 },
+                    '40-49': { excellent: 0.80, good: 0.70, average: 0.49, low: 0.39 },
+                    '50-59': { excellent: 0.92, good: 0.78, average: 0.49, low: 0.35 },
+                    '60+': { excellent: 0.92, good: 0.78, average: 0.49, low: 0.35 }
                 }
             },
             flexibility: {
                 male: {
-                    '20-29': { excellent: 20, good: 15, average: 10, low: 5 },
-                    '30-39': { excellent: 18, good: 13, average: 8, low: 3 },
-                    '40-49': { excellent: 16, good: 11, average: 6, low: 1 },
-                    '50-59': { excellent: 14, good: 9, average: 4, low: -1 },
-                    '60+': { excellent: 12, good: 7, average: 2, low: -3 }
+                    '17-19': { excellent: 21, good: 17, average: 8, low: 4 },
+                    '20-29': { excellent: 20, good: 17, average: 9, low: 6 },
+                    '30-39': { excellent: 19, good: 15, average: 6, low: 2 },
+                    '40-49': { excellent: 17, good: 13, average: 5, low: 1 },
+                    '50-59': { excellent: 17, good: 13, average: 4, low: 0 },
+                    '60+': { excellent: 14, good: 10, average: 2, low: -2 }
                 },
                 female: {
-                    '20-29': { excellent: 24, good: 19, average: 14, low: 9 },
-                    '30-39': { excellent: 22, good: 17, average: 12, low: 7 },
-                    '40-49': { excellent: 20, good: 15, average: 10, low: 5 },
-                    '50-59': { excellent: 18, good: 13, average: 8, low: 3 },
-                    '60+': { excellent: 16, good: 11, average: 6, low: 1 }
+                    '17-19': { excellent: 19, good: 16, average: 9, low: 6 },
+                    '20-29': { excellent: 20, good: 17, average: 10, low: 7 },
+                    '30-39': { excellent: 21, good: 17, average: 8, low: 4 },
+                    '40-49': { excellent: 20, good: 16, average: 8, low: 4 },
+                    '50-59': { excellent: 18, good: 15, average: 8, low: 5 },
+                    '60+': { excellent: 18, good: 15, average: 8, low: 5 }
                 }
             }
         };
@@ -481,6 +487,7 @@
         let currentResults = null;
 
         function getAgeGroup(age) {
+            if (age >= 17 && age <= 19) return '17-19';
             if (age >= 20 && age <= 29) return '20-29';
             if (age >= 30 && age <= 39) return '30-39';
             if (age >= 40 && age <= 49) return '40-49';
@@ -749,11 +756,14 @@
             const ageGroup = getAgeGroup(currentFormData.age);
             const genderCriteria = currentFormData.gender;
 
+            // Calculate relative values for back strength (kg/weight)
+            const backstrengthRelative = currentFormData.backstrength / currentFormData.weight;
+
             // Evaluate each measurement
             currentResults = {
                 handgrip: evaluatePerformance(currentFormData.handgrip, fitnessCriteria.handgrip[genderCriteria][ageGroup]),
                 legstrength: evaluatePerformance(currentFormData.legstrength, fitnessCriteria.legstrength[genderCriteria][ageGroup]),
-                backstrength: evaluatePerformance(currentFormData.backstrength, fitnessCriteria.backstrength[genderCriteria][ageGroup]),
+                backstrength: evaluatePerformance(backstrengthRelative, fitnessCriteria.backstrength[genderCriteria][ageGroup]),
                 flexibility: evaluatePerformance(currentFormData.flexibility, fitnessCriteria.flexibility[genderCriteria][ageGroup])
             };
 
