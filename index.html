@@ -382,7 +382,36 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn">สร้างรายงานผล PDF</button>
+                <!-- Optional Special Tests -->
+                <div class="measurement-section">
+                    <h2 class="section-title">การทดสอบพิเศษ (Optional)</h2>
+
+                    <div class="info-box">
+                        <p><strong>คำแนะนำ:</strong> เลือกการทดสอบพิเศษที่ต้องการเพิ่มในรายงาน (ไม่จำเป็นต้องทำ)</p>
+                    </div>
+
+                    <!-- Push-up Test -->
+                    <div style="background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 2px solid #e0e0e0;">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="enablePushup" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;" onchange="togglePushupInput()">
+                            <label for="enablePushup" style="font-weight: 600; font-size: 1.1em; cursor: pointer; margin: 0;">Push-up Test (ทดสอบการวิดพื้น)</label>
+                        </div>
+                        <div id="pushupInputArea" style="display: none;">
+                            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                                <strong>ชาย:</strong> Standard Push-up (มาตรฐาน) | <strong>หญิง:</strong> Modified Push-up (แบบง่าย)
+                            </p>
+                            <div class="form-group">
+                                <label for="pushupCount">จำนวนครั้งที่ทำได้ <span class="unit">(reps)</span></label>
+                                <input type="number" id="pushupCount" min="0" max="200" step="1" placeholder="จำนวนครั้ง 0-200">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button type="submit" class="btn">สร้างรายงานผล PDF</button>
+                    <button type="button" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);" onclick="generateCleanReport()">Clean Report (ไม่มีโลโก้)</button>
+                </div>
             </form>
         </div>
 
@@ -410,6 +439,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
+        // Toggle push-up input area
+        function togglePushupInput() {
+            const checkbox = document.getElementById('enablePushup');
+            const inputArea = document.getElementById('pushupInputArea');
+            const pushupInput = document.getElementById('pushupCount');
+
+            if (checkbox.checked) {
+                inputArea.style.display = 'block';
+                pushupInput.required = true;
+            } else {
+                inputArea.style.display = 'none';
+                pushupInput.required = false;
+                pushupInput.value = '';
+            }
+        }
+
         // Fitness evaluation criteria based on age and gender
         const fitnessCriteria = {
             handgrip: {
@@ -483,11 +528,30 @@
                     '50-59': { excellent: 18, good: 15, average: 8, low: 5 },
                     '60+': { excellent: 18, good: 15, average: 8, low: 5 }
                 }
+            },
+            pushup: {
+                male: {
+                    '17-19': { excellent: 54, good: 45, average: 35, low: 20 },
+                    '20-29': { excellent: 54, good: 45, average: 35, low: 20 },
+                    '30-39': { excellent: 44, good: 35, average: 24, low: 15 },
+                    '40-49': { excellent: 39, good: 30, average: 20, low: 12 },
+                    '50-59': { excellent: 34, good: 25, average: 15, low: 8 },
+                    '60+': { excellent: 29, good: 20, average: 10, low: 5 }
+                },
+                female: {
+                    '17-19': { excellent: 48, good: 34, average: 17, low: 6 },
+                    '20-29': { excellent: 48, good: 34, average: 17, low: 6 },
+                    '30-39': { excellent: 39, good: 25, average: 12, low: 4 },
+                    '40-49': { excellent: 34, good: 20, average: 8, low: 3 },
+                    '50-59': { excellent: 29, good: 15, average: 6, low: 2 },
+                    '60+': { excellent: 19, good: 5, average: 3, low: 1 }
+                }
             }
         };
 
         let currentFormData = null;
         let currentResults = null;
+        let isCleanReport = false;
 
         function getAgeGroup(age) {
             if (age >= 17 && age <= 19) return '17-19';
@@ -506,16 +570,23 @@
             return { level: 'ต่ำมาก', class: 'very-low' };
         }
 
-        function generatePDFContent(formData, results) {
+        function generatePDFContent(formData, results, cleanReport = false) {
+            const headerContent = cleanReport ?
+                `<div style="text-align: center; margin-bottom: 15px; padding: 15px; background-color: #667eea; color: white;">
+                    <h1 style="font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">รายงานผลการทดสอบสมรรถภาพทางกาย</h1>
+                    <div style="font-size: 11pt; margin: 0;">Physical Fitness Test Report</div>
+                </div>` :
+                `<div style="text-align: center; margin-bottom: 15px; padding: 15px; background-color: #667eea; color: white;">
+                    <h1 style="font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">รายงานผลการทดสอบสมรรถภาพทางกาย</h1>
+                    <div style="font-size: 11pt; margin: 0;">Physical Fitness Test Report</div>
+                    <div style="font-size: 10pt; margin-top: 5px;"><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong> | Bangkok Hospital Siriroj</div>
+                </div>`;
+
             const content = `
                 <div style="width: 165mm; margin: 0 auto; padding: 0; box-sizing: border-box; font-family: 'Sarabun', sans-serif;">
 
                     <!-- Header -->
-                    <div style="text-align: center; margin-bottom: 15px; padding: 15px; background-color: #667eea; color: white;">
-                        <h1 style="font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">รายงานผลการทดสอบสมรรถภาพทางกาย</h1>
-                        <div style="font-size: 11pt; margin: 0;">Physical Fitness Test Report</div>
-                        <div style="font-size: 10pt; margin-top: 5px;"><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong> | Bangkok Hospital Siriroj</div>
-                    </div>
+                    ${headerContent}
 
                     <!-- Personal Information -->
                     <div style="margin-bottom: 15px; padding: 12px; background-color: #f8f9ff; border: 1px solid #e0e0e0;">
@@ -574,6 +645,29 @@
                         </div>
                     </div>
 
+                    <!-- Optional Special Tests Results -->
+                    ${results.pushup ? `
+                    <div style="margin-bottom: 15px;">
+                        <h3 style="color: #667eea; font-size: 13pt; margin: 0 0 10px 0; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 5px;">การทดสอบพิเศษ / Special Tests</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11pt; border: 2px solid #667eea;">
+                            <thead>
+                                <tr style="background-color: #667eea; color: white;">
+                                    <th style="padding: 10px; text-align: left; border: 1px solid #667eea; font-weight: 600;">รายการทดสอบ / Test Item</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #667eea; font-weight: 600;">ผลลัพธ์ / Result</th>
+                                    <th style="padding: 10px; text-align: center; border: 1px solid #667eea; font-weight: 600;">ระดับ / Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background-color: #f9f9f9;">
+                                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: 500;">Push-up Test / ทดสอบการวิดพื้น<br><span style="font-size: 0.85em; color: #666;">${formData.gender === 'male' ? '(Standard Push-up)' : '(Modified Push-up)'}</span></td>
+                                    <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: 600;">${formData.pushup} reps</td>
+                                    <td style="padding: 10px; text-align: center; font-weight: 600; color: white; background-color: ${getBadgeColor(results.pushup.class)}; border: 1px solid #ddd;">${results.pushup.level}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    ` : ''}
+
                     <!-- Summary -->
                     <div style="margin-bottom: 15px; padding: 12px; background-color: #e3f2fd; border-left: 5px solid #2196f3;">
                         <div style="font-size: 11pt; font-weight: 600; color: #1565c0;">
@@ -599,10 +693,10 @@
                     </div>
 
                     <!-- Footer -->
-                    <div style="text-align: center; margin-top: 15px; padding: 10px; font-size: 9pt; color: #666; border-top: 1px solid #e0e0e0;">
+                    ${cleanReport ? '' : `<div style="text-align: center; margin-top: 15px; padding: 10px; font-size: 9pt; color: #666; border-top: 1px solid #e0e0e0;">
                         <p style="margin: 0;"><strong>โรงพยาบาลกรุงเทพสิริโรจน์</strong> Bangkok Hospital Siriroj</p>
                         <p style="margin: 5px 0 0 0;">44 ถนนเฉลิมพระเกียรติ ร.9 อำเภอเมือง จังหวัดภูเก็ต 83000 | Tel: +66 76 361 888</p>
-                    </div>
+                    </div>`}
                 </div>
             `;
 
@@ -717,7 +811,10 @@
                 );
 
                 // Save PDF to local
-                pdf.save(`Physical_Fitness_Test_Result_${currentFormData.hn}.pdf`);
+                const filename = isCleanReport ?
+                    `Physical_Fitness_Test_Clean_${currentFormData.hn}.pdf` :
+                    `Physical_Fitness_Test_Result_${currentFormData.hn}.pdf`;
+                pdf.save(filename);
 
                 alert('PDF ดาวน์โหลดเรียบร้อยและส่ง Telegram แล้ว!');
             } catch (error) {
@@ -758,6 +855,12 @@
                 flexibility: parseFloat(document.getElementById('flexibility').value)
             };
 
+            // Check for optional tests
+            const enablePushup = document.getElementById('enablePushup').checked;
+            if (enablePushup) {
+                currentFormData.pushup = parseInt(document.getElementById('pushupCount').value);
+            }
+
             // Get age group and criteria
             const ageGroup = getAgeGroup(currentFormData.age);
             const genderCriteria = currentFormData.gender;
@@ -773,8 +876,14 @@
                 flexibility: evaluatePerformance(currentFormData.flexibility, fitnessCriteria.flexibility[genderCriteria][ageGroup])
             };
 
+            // Evaluate optional tests
+            if (enablePushup && currentFormData.pushup !== undefined) {
+                currentResults.pushup = evaluatePerformance(currentFormData.pushup, fitnessCriteria.pushup[genderCriteria][ageGroup]);
+            }
+
             // Generate PDF content
-            const pdfContent = generatePDFContent(currentFormData, currentResults);
+            isCleanReport = false; // Reset to normal report
+            const pdfContent = generatePDFContent(currentFormData, currentResults, isCleanReport);
             document.getElementById('pdfContentArea').innerHTML = pdfContent;
 
             // Generate QR Codes immediately after content is set
@@ -803,6 +912,85 @@
             // Show preview after QR codes are generated
             document.getElementById('pdfPreview').style.display = 'block';
         });
+
+        // Generate Clean Report function
+        async function generateCleanReport() {
+            // Validate form first
+            const form = document.getElementById('fitnessForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Get form data
+            currentFormData = {
+                hn: document.getElementById('hn').value,
+                age: parseInt(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                weight: parseFloat(document.getElementById('weight').value),
+                handgrip: parseFloat(document.getElementById('handgrip').value),
+                legstrength: parseFloat(document.getElementById('legstrength').value),
+                backstrength: parseFloat(document.getElementById('backstrength').value),
+                flexibility: parseFloat(document.getElementById('flexibility').value)
+            };
+
+            // Check for optional tests
+            const enablePushup = document.getElementById('enablePushup').checked;
+            if (enablePushup) {
+                currentFormData.pushup = parseInt(document.getElementById('pushupCount').value);
+            }
+
+            // Get age group and criteria
+            const ageGroup = getAgeGroup(currentFormData.age);
+            const genderCriteria = currentFormData.gender;
+
+            // Calculate relative values for back strength (kg/weight)
+            const backstrengthRelative = currentFormData.backstrength / currentFormData.weight;
+
+            // Evaluate each measurement
+            currentResults = {
+                handgrip: evaluatePerformance(currentFormData.handgrip, fitnessCriteria.handgrip[genderCriteria][ageGroup]),
+                legstrength: evaluatePerformance(currentFormData.legstrength, fitnessCriteria.legstrength[genderCriteria][ageGroup]),
+                backstrength: evaluatePerformance(backstrengthRelative, fitnessCriteria.backstrength[genderCriteria][ageGroup]),
+                flexibility: evaluatePerformance(currentFormData.flexibility, fitnessCriteria.flexibility[genderCriteria][ageGroup])
+            };
+
+            // Evaluate optional tests
+            if (enablePushup && currentFormData.pushup !== undefined) {
+                currentResults.pushup = evaluatePerformance(currentFormData.pushup, fitnessCriteria.pushup[genderCriteria][ageGroup]);
+            }
+
+            // Generate Clean PDF content
+            isCleanReport = true;
+            const pdfContent = generatePDFContent(currentFormData, currentResults, isCleanReport);
+            document.getElementById('pdfContentArea').innerHTML = pdfContent;
+
+            // Generate QR Codes immediately after content is set
+            const qrHandGrip = document.getElementById('qrcode-handgrip');
+            qrHandGrip.innerHTML = '';
+            new QRCode(qrHandGrip, {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/r/personal/tawatchai_ch_bdms_co_th/Documents/BSI/Rehap/%E0%B9%81%E0%B8%A3%E0%B8%87%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD.pdf?csf=1&web=1&e=GZtcn7",
+                width: 100,
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            const qrHealthCheck = document.getElementById('qrcode-healthcheck');
+            qrHealthCheck.innerHTML = '';
+            new QRCode(qrHealthCheck, {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/g/personal/tawatchai_ch_bdms_co_th/EfZ3JgjI60dAjXJKe8dCXoIBglbJomYxLsPx-0S6hOB-eA?e=1C0DWT",
+                width: 100,
+                height: 100,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            // Show preview after QR codes are generated
+            document.getElementById('pdfPreview').style.display = 'block';
+        }
     </script>
 </body>
 </html>
