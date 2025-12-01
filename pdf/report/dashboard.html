@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Fitness Analytics Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="data.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans Thai', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 15px;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 3px solid #3498db;
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; font-weight: 600; }
+        .header p { font-size: 0.95em; opacity: 0.9; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 { font-size: 0.75em; color: #7f8c8d; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 2em; font-weight: 700; color: #2c3e50; }
+        .stat-card .label { font-size: 0.8em; color: #95a5a6; margin-top: 2px; }
+        .filters {
+            padding: 15px 20px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-group { display: flex; flex-direction: column; min-width: 150px; }
+        .filter-group label { font-size: 0.75em; color: #7f8c8d; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; }
+        .filter-group select {
+            padding: 8px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 0.9em;
+            background: #fff;
+        }
+        .btn {
+            background: #3498db;
+            color: #fff;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-top: auto;
+            font-weight: 500;
+        }
+        .btn:hover { background: #2980b9; }
+        .btn-export { background: #27ae60; }
+        .btn-export:hover { background: #229954; }
+        .charts-section { padding: 20px; }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-box {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .chart-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            font-weight: 600;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        .chart-container canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .table-container { padding: 0 20px 20px; }
+        .table-container h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border: 1px solid #ddd;
+            font-size: 0.85em;
+        }
+        th {
+            background: #34495e;
+            color: #fff;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        td { padding: 8px 10px; border-bottom: 1px solid #ecf0f1; }
+        tr:hover { background: #f8f9fa; }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .badge-excellent { background: #27ae60; color: #fff; }
+        .badge-good { background: #2ecc71; color: #fff; }
+        .badge-average { background: #f39c12; color: #fff; }
+        .badge-low { background: #e67e22; color: #fff; }
+        .badge-very-low { background: #e74c3c; color: #fff; }
+        .loading, .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: #ecf0f1;
+            border-top: 1px solid #ddd;
+            font-size: 0.8em;
+            color: #7f8c8d;
+            border-radius: 0 0 8px 8px;
+        }
+        .bmi-table-container {
+            padding: 10px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bmi-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        .bmi-table th {
+            background: #34495e;
+            color: #fff;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .bmi-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ecf0f1;
+            font-weight: 600;
+        }
+        .bmi-table tbody tr {
+            transition: transform 0.2s;
+        }
+        .bmi-table tbody tr:hover {
+            transform: scale(1.02);
+        }
+        .bmi-row-underweight {
+            background: #3498db;
+            color: #fff;
+        }
+        .bmi-row-normal {
+            background: #27ae60;
+            color: #fff;
+        }
+        .bmi-row-overweight {
+            background: #f39c12;
+            color: #fff;
+        }
+        .bmi-row-obese1 {
+            background: #e67e22;
+            color: #fff;
+        }
+        .bmi-row-obese2 {
+            background: #e74c3c;
+            color: #fff;
+        }
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+            .header, .filters, .footer, .stats-grid { display: none !important; }
+            .container {
+                max-width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+            }
+            .charts-section {
+                padding: 10px;
+                page-break-after: always;
+            }
+            .charts-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .chart-box {
+                page-break-inside: avoid;
+                border: 2px solid #34495e;
+                padding: 8px;
+                background: #fff;
+                border-radius: 4px;
+            }
+            .chart-box h3 {
+                font-size: 0.85em;
+                margin-bottom: 6px;
+                color: #2c3e50;
+                font-weight: 700;
+                text-align: center;
+                padding-bottom: 4px;
+                border-bottom: 2px solid #3498db;
+            }
+            .chart-container {
+                height: 240px !important;
+                width: 100% !important;
+                position: relative;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            .chart-container canvas {
+                max-height: 240px !important;
+                max-width: 100% !important;
+                width: auto !important;
+                height: auto !important;
+                object-fit: contain !important;
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+            .table-container {
+                page-break-inside: avoid;
+                padding: 15px;
+            }
+            .table-container h2 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+                color: #2c3e50;
+                border-bottom: 2px solid #16a085;
+                padding-bottom: 8px;
+            }
+            table {
+                font-size: 0.75em;
+                border: 2px solid #34495e;
+            }
+            th, td {
+                padding: 6px 8px;
+                border: 1px solid #ddd;
+            }
+            th {
+                background: #34495e !important;
+                color: #fff !important;
+            }
+            .badge {
+                padding: 2px 6px;
+                font-size: 0.7em;
+            }
+            @page {
+                size: A4;
+                margin: 1.2cm;
+            }
+            .bmi-table-container {
+                height: auto !important;
+                padding: 5px;
+            }
+            .bmi-table {
+                width: 100%;
+                font-size: 0.8em;
+            }
+            .bmi-table th, .bmi-table td {
+                padding: 8px;
+            }
+            #printTitle {
+                page-break-after: avoid;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Physical Fitness Analytics Dashboard</h1>
+            <p>โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</p>
+            <p style="font-size: 0.85em; margin-top: 8px;">
+                <button class="btn" onclick="manualRefresh()" style="font-size: 0.9em; padding: 8px 15px;">
+                    🔄 Refresh Data
+                </button>
+                <span id="refreshStatus" style="margin-left: 10px; color: #7f8c8d;"></span>
+            </p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>Total Tests</h3>
+                <div class="value" id="totalTests">-</div>
+                <div class="label">จำนวนผู้ทดสอบทั้งหมด</div>
+            </div>
+            <div class="stat-card">
+                <h3>Male</h3>
+                <div class="value" id="maleCount">-</div>
+                <div class="label">ผู้ทดสอบชาย</div>
+            </div>
+            <div class="stat-card">
+                <h3>Female</h3>
+                <div class="value" id="femaleCount">-</div>
+                <div class="label">ผู้ทดสอบหญิง</div>
+            </div>
+            <div class="stat-card">
+                <h3>Average Age</h3>
+                <div class="value" id="avgAge">-</div>
+                <div class="label">อายุเฉลี่ย (ปี)</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Company</label>
+                <select id="filterCompany">
+                    <option value="">All Companies</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Gender</label>
+                <select id="filterGender">
+                    <option value="">All</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Age Group</label>
+                <select id="filterAge">
+                    <option value="">All</option>
+                    <option value="17-19">17-19</option>
+                    <option value="20-29">20-29</option>
+                    <option value="30-39">30-39</option>
+                    <option value="40-49">40-49</option>
+                    <option value="50-59">50-59</option>
+                    <option value="60+">60+</option>
+                </select>
+            </div>
+            <button class="btn" onclick="applyFilters()">Apply Filter</button>
+            <button class="btn btn-export" onclick="exportToCSV()">Export CSV</button>
+            <button class="btn" onclick="printCharts()" style="background: #9b59b6;">🖨️ Print Charts</button>
+            <button class="btn" onclick="printTable()" style="background: #16a085;">🖨️ Print Table</button>
+        </div>
+
+        <div class="charts-section" id="chartsSection">
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <h3>Performance Level Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="levelChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Gender Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Average Measurements</h3>
+                    <div class="chart-container">
+                        <canvas id="avgChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Age Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>BMI Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="bmiChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Hand Grip Achievement</h3>
+                    <div class="chart-container">
+                        <canvas id="handgripAchieveChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Leg Strength Achievement</h3>
+                    <div class="chart-container">
+                        <canvas id="legstrengthAchieveChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Back Strength Achievement</h3>
+                    <div class="chart-container">
+                        <canvas id="backstrengthAchieveChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Flexibility Achievement</h3>
+                    <div class="chart-container">
+                        <canvas id="flexibilityAchieveChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>BMI Count by Category</h3>
+                    <div class="bmi-table-container" id="bmiTableContainer">
+                        <table class="bmi-table">
+                            <thead>
+                                <tr>
+                                    <th>BMI Category</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bmiTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableSection">
+            <h2>Test Results Summary</h2>
+            <div id="tableContent">
+                <div class="loading">Loading data...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Bangkok Hospital Siriroj. Physical Fitness Assessment System.</p>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let filteredData = [];
+        let charts = {};
+
+        let dataLoaded = false;
+
+        async function loadData() {
+            if (dataLoaded) return; // Prevent multiple loads
+
+            try {
+                // Check if data.js is loaded first (for file:// protocol)
+                if (typeof FITNESS_TEST_DATA !== 'undefined') {
+                    allData = FITNESS_TEST_DATA;
+                    filteredData = allData;
+                    dataLoaded = true;
+                    renderDashboard();
+                    return;
+                }
+                // Try PHP endpoint if running on server
+                if (window.location.protocol !== 'file:') {
+                    const r = await fetch('get_data.php');
+                    if (r.ok) {
+                        allData = await r.json();
+                        filteredData = allData;
+                        dataLoaded = true;
+                        renderDashboard();
+                        return;
+                    }
+                }
+                throw new Error('No data');
+            } catch(e) {
+                document.getElementById('tableContent').innerHTML =
+                    '<div class="no-data">No test data available.<br>Please run tests to generate data.</div>';
+                ['totalTests','maleCount','femaleCount','avgAge'].forEach(id =>
+                    document.getElementById(id).textContent = '0');
+                dataLoaded = true;
+            }
+        }
+
+        function getAgeGroup(age) {
+            if (age <= 19) return '17-19';
+            if (age <= 29) return '20-29';
+            if (age <= 39) return '30-39';
+            if (age <= 49) return '40-49';
+            if (age <= 59) return '50-59';
+            return '60+';
+        }
+
+        let isRendering = false;
+
+        function populateCompanyFilter() {
+            // Get unique companies from data
+            const companies = [...new Set(allData.map(d => d.company).filter(c => c))];
+            const companySelect = document.getElementById('filterCompany');
+
+            // Keep "All Companies" option
+            companySelect.innerHTML = '<option value="">All Companies</option>';
+
+            // Add each company
+            companies.sort().forEach(company => {
+                const option = document.createElement('option');
+                option.value = company;
+                option.textContent = company;
+                companySelect.appendChild(option);
+            });
+        }
+
+        function renderDashboard() {
+            if (isRendering) return; // Prevent multiple renders
+            isRendering = true;
+
+            try {
+                populateCompanyFilter();
+
+                if (!filteredData.length) {
+                    document.getElementById('tableContent').innerHTML = '<div class="no-data">No matching data</div>';
+                    return;
+                }
+                updateStats();
+                renderCharts();
+                renderTable();
+            } finally {
+                isRendering = false;
+            }
+        }
+
+        function updateStats() {
+            const total = filteredData.length;
+            const male = filteredData.filter(d => d.gender === 'male').length;
+            const female = filteredData.filter(d => d.gender === 'female').length;
+            const avgAge = (filteredData.reduce((s, d) => s + d.age, 0) / total).toFixed(1);
+            document.getElementById('totalTests').textContent = total;
+            document.getElementById('maleCount').textContent = male;
+            document.getElementById('femaleCount').textContent = female;
+            document.getElementById('avgAge').textContent = avgAge;
+        }
+
+        function getBMICategory(bmi) {
+            if (bmi < 18.5) return 'Underweight';
+            if (bmi < 23) return 'Normal';
+            if (bmi < 25) return 'Overweight';
+            if (bmi < 30) return 'Obese I';
+            return 'Obese II';
+        }
+
+        function getBMIColor(bmi) {
+            if (bmi < 18.5) return '#3498db'; // Blue
+            if (bmi < 23) return '#27ae60'; // Green
+            if (bmi < 25) return '#f39c12'; // Yellow
+            if (bmi < 30) return '#e67e22'; // Orange
+            return '#e74c3c'; // Red
+        }
+
+        function renderCharts() {
+            // Destroy existing charts properly
+            if (charts.level) charts.level.destroy();
+            if (charts.gender) charts.gender.destroy();
+            if (charts.avg) charts.avg.destroy();
+            if (charts.age) charts.age.destroy();
+            if (charts.bmi) charts.bmi.destroy();
+            if (charts.handgripAchieve) charts.handgripAchieve.destroy();
+            if (charts.legstrengthAchieve) charts.legstrengthAchieve.destroy();
+            if (charts.backstrengthAchieve) charts.backstrengthAchieve.destroy();
+            if (charts.flexibilityAchieve) charts.flexibilityAchieve.destroy();
+
+            const chartDefaults = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                // Explicitly include the datalabels plugin
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11, family: 'Noto Sans Thai' },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                        titleFont: { size: 13, weight: 'bold', family: 'Noto Sans Thai' },
+                        bodyFont: { size: 12, family: 'Noto Sans Thai' },
+                        padding: 12,
+                        cornerRadius: 6,
+                        enabled: true,
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    datalabels: {
+                        display: true,  // Explicitly enable display
+                        color: '#fff',
+                        font: {
+                            size: 12,
+                            weight: 'bold',
+                            family: 'Noto Sans Thai'
+                        },
+                        formatter: (value) => value > 0 ? value : '',
+                        anchor: 'center',
+                        align: 'center'
+                    }
+                }
+            };
+
+            // Chart 1: Performance Level Distribution (Horizontal Bar)
+            const levels = {excellent:0, good:0, average:0, low:0, 'very-low':0};
+            filteredData.forEach(d => {
+                ['handgrip','legstrength','backstrength','flexibility'].forEach(k => {
+                    if (d.results[k]) levels[d.results[k].class]++;
+                });
+            });
+
+            charts.level = new Chart(document.getElementById('levelChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Excellent', 'Good', 'Average', 'Low', 'Very Low'],
+                    datasets: [{
+                        label: 'Number of Results',
+                        data: [levels.excellent, levels.good, levels.average, levels.low, levels['very-low']],
+                        backgroundColor: ['#27ae60', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c'],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 11 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            ticks: { font: { size: 11, weight: '600' } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            formatter: (value) => {
+                                return value > 0 ? value : '';
+                            },
+                            anchor: 'center',
+                            align: 'center'
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Gender Distribution (Pie with percentage)
+            const male = filteredData.filter(d => d.gender === 'male').length;
+            const female = filteredData.filter(d => d.gender === 'female').length;
+            const total = male + female;
+
+            charts.gender = new Chart(document.getElementById('genderChart'), {
+                type: 'pie',
+                data: {
+                    labels: [`Male (${((male/total)*100).toFixed(1)}%)`, `Female (${((female/total)*100).toFixed(1)}%)`],
+                    datasets: [{
+                        data: [male, female],
+                        backgroundColor: ['#3498db', '#e91e63'],
+                        borderWidth: 3,
+                        borderColor: '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: {
+                            ...chartDefaults.plugins.legend,
+                            position: 'right'
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            formatter: (value, ctx) => {
+                                const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Average Measurements (Grouped by Male/Female)
+            const avgMale = ['handgrip','legstrength','backstrength','flexibility'].map(k => {
+                const maleData = filteredData.filter(d => d.gender === 'male');
+                return maleData.length ? (maleData.reduce((s,d) => s + d.measurements[k], 0) / maleData.length).toFixed(1) : 0;
+            });
+            const avgFemale = ['handgrip','legstrength','backstrength','flexibility'].map(k => {
+                const femaleData = filteredData.filter(d => d.gender === 'female');
+                return femaleData.length ? (femaleData.reduce((s,d) => s + d.measurements[k], 0) / femaleData.length).toFixed(1) : 0;
+            });
+
+            charts.avg = new Chart(document.getElementById('avgChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Hand Grip', 'Leg Strength', 'Back Strength', 'Flexibility'],
+                    datasets: [
+                        {
+                            label: 'Male Average (kg/cm)',
+                            data: avgMale,
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                            borderColor: '#3498db',
+                            borderWidth: 2,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Female Average (kg/cm)',
+                            data: avgFemale,
+                            backgroundColor: 'rgba(233, 30, 99, 0.8)',
+                            borderColor: '#e91e63',
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { size: 11 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ticks: { font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        datalabels: {
+                            color: '#2c3e50',
+                            font: {
+                                size: 10,
+                                weight: 'bold'
+                            },
+                            formatter: (value) => {
+                                return value > 0 ? parseFloat(value).toFixed(1) : '';
+                            },
+                            anchor: 'end',
+                            align: 'top'
+                        }
+                    }
+                }
+            });
+
+            // Chart 4: Age Distribution (Area Line Chart)
+            const ageCounts = {};
+            filteredData.forEach(d => {
+                const g = getAgeGroup(d.age);
+                ageCounts[g] = (ageCounts[g] || 0) + 1;
+            });
+
+            charts.age = new Chart(document.getElementById('ageChart'), {
+                type: 'line',
+                data: {
+                    labels: ['17-19 years', '20-29 years', '30-39 years', '40-49 years', '50-59 years', '60+ years'],
+                    datasets: [{
+                        label: 'Number of Participants',
+                        data: ['17-19','20-29','30-39','40-49','50-59','60+'].map(g => ageCounts[g] || 0),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#3498db',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, font: { size: 11 } },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            ticks: { font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        datalabels: {
+                            color: '#2c3e50',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            formatter: (value) => {
+                                return value > 0 ? value : '';
+                            },
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            borderRadius: 4,
+                            padding: 4
+                        }
+                    }
+                }
+            });
+
+            // Chart 5: BMI Distribution (Half Donut - Green to Red)
+            const bmiCounts = {
+                'Underweight': 0,
+                'Normal': 0,
+                'Overweight': 0,
+                'Obese I': 0,
+                'Obese II': 0
+            };
+            filteredData.forEach(d => {
+                const bmi = d.weight / Math.pow(d.age > 0 ? 1.65 : 1.70, 2); // Estimate BMI
+                const category = getBMICategory(bmi);
+                bmiCounts[category]++;
+            });
+
+            charts.bmi = new Chart(document.getElementById('bmiChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Underweight', 'Normal', 'Overweight', 'Obese I', 'Obese II'],
+                    datasets: [{
+                        data: [bmiCounts['Underweight'], bmiCounts['Normal'], bmiCounts['Overweight'], bmiCounts['Obese I'], bmiCounts['Obese II']],
+                        backgroundColor: ['#3498db', '#27ae60', '#f39c12', '#e67e22', '#e74c3c'],
+                        borderWidth: 3,
+                        borderColor: '#fff',
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    ...chartDefaults,
+                    rotation: -90,
+                    circumference: 180,
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: {
+                            ...chartDefaults.plugins.legend,
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            formatter: (value, ctx) => {
+                                if (value === 0) return '';
+                                const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = (value * 100 / sum).toFixed(0) + '%';
+                                return percentage;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 6-9: Achievement Percentage for each test
+            const createAchievementChart = (canvasId, testType, title) => {
+                const levels = {excellent:0, good:0, average:0, low:0, 'very-low':0};
+                let total = 0;
+
+                filteredData.forEach(d => {
+                    if (d.results[testType]) {
+                        levels[d.results[testType].class]++;
+                        total++;
+                    }
+                });
+
+                const excellentPercent = total > 0 ? ((levels.excellent / total) * 100).toFixed(1) : 0;
+                const goodPercent = total > 0 ? ((levels.good / total) * 100).toFixed(1) : 0;
+                const averagePercent = total > 0 ? ((levels.average / total) * 100).toFixed(1) : 0;
+                const lowPercent = total > 0 ? ((levels.low / total) * 100).toFixed(1) : 0;
+                const veryLowPercent = total > 0 ? ((levels['very-low'] / total) * 100).toFixed(1) : 0;
+
+                return new Chart(document.getElementById(canvasId), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Excellent', 'Good', 'Average', 'Low', 'Very Low'],
+                        datasets: [{
+                            label: 'Achievement %',
+                            data: [excellentPercent, goodPercent, averagePercent, lowPercent, veryLowPercent],
+                            backgroundColor: ['#27ae60', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c'],
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        ...chartDefaults,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 25,
+                                    font: { size: 11 },
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: {
+                                ticks: { font: { size: 10, weight: '600' } },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            ...chartDefaults.plugins,
+                            tooltip: {
+                                ...chartDefaults.plugins.tooltip,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y.toFixed(1) + '%';
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                font: {
+                                    size: 11,
+                                    weight: 'bold'
+                                },
+                                formatter: (value) => {
+                                    return value > 0 ? value.toFixed(0) + '%' : '';
+                                },
+                                anchor: 'end',
+                                align: 'top'
+                            }
+                        }
+                    }
+                });
+            };
+
+            charts.handgripAchieve = createAchievementChart('handgripAchieveChart', 'handgrip', 'Hand Grip');
+            charts.legstrengthAchieve = createAchievementChart('legstrengthAchieveChart', 'legstrength', 'Leg Strength');
+            charts.backstrengthAchieve = createAchievementChart('backstrengthAchieveChart', 'backstrength', 'Back Strength');
+            charts.flexibilityAchieve = createAchievementChart('flexibilityAchieveChart', 'flexibility', 'Flexibility');
+
+            // Chart 10: BMI Count by Category (Table with Green to Red)
+            const bmiCountData = {
+                'Underweight': 0,
+                'Normal': 0,
+                'Overweight': 0,
+                'Obese I': 0,
+                'Obese II': 0
+            };
+            filteredData.forEach(d => {
+                const bmi = d.weight / Math.pow(d.age > 0 ? 1.65 : 1.70, 2); // Estimate BMI
+                const category = getBMICategory(bmi);
+                bmiCountData[category]++;
+            });
+
+            renderBMITable(bmiCountData);
+        }
+
+        function renderBMITable(bmiCountData) {
+            const bmiCategories = [
+                { name: 'Underweight', class: 'bmi-row-underweight', range: '< 18.5' },
+                { name: 'Normal', class: 'bmi-row-normal', range: '18.5 - 22.9' },
+                { name: 'Overweight', class: 'bmi-row-overweight', range: '23 - 24.9' },
+                { name: 'Obese I', class: 'bmi-row-obese1', range: '25 - 29.9' },
+                { name: 'Obese II', class: 'bmi-row-obese2', range: '≥ 30' }
+            ];
+
+            const tbody = document.getElementById('bmiTableBody');
+            tbody.innerHTML = bmiCategories.map(cat => `
+                <tr class="${cat.class}">
+                    <td>${cat.name} <span style="opacity: 0.8; font-size: 0.85em;">(${cat.range})</span></td>
+                    <td style="text-align: center; font-size: 1.2em;">${bmiCountData[cat.name]}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTable() {
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>HN</th>
+                            <th>Company</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Hand Grip</th>
+                            <th>Leg Strength</th>
+                            <th>Back Strength</th>
+                            <th>Flexibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredData.map(d => `
+                            <tr>
+                                <td>${d.date}</td>
+                                <td>${d.hn}</td>
+                                <td>${d.company || '-'}</td>
+                                <td>${d.age}</td>
+                                <td>${d.gender === 'male' ? 'M' : 'F'}</td>
+                                <td>${d.measurements.handgrip.toFixed(1)} <span class="badge badge-${d.results.handgrip.class}">${d.results.handgrip.level}</span></td>
+                                <td>${d.measurements.legstrength.toFixed(1)} <span class="badge badge-${d.results.legstrength.class}">${d.results.legstrength.level}</span></td>
+                                <td>${d.measurements.backstrength.toFixed(1)} <span class="badge badge-${d.results.backstrength.class}">${d.results.backstrength.level}</span></td>
+                                <td>${d.measurements.flexibility.toFixed(1)} <span class="badge badge-${d.results.flexibility.class}">${d.results.flexibility.level}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('tableContent').innerHTML = html;
+        }
+
+        function applyFilters() {
+            if (!allData.length) return;
+
+            const company = document.getElementById('filterCompany').value;
+            const gender = document.getElementById('filterGender').value;
+            const ageGroup = document.getElementById('filterAge').value;
+
+            filteredData = allData.filter(d => {
+                if (company && d.company !== company) return false;
+                if (gender && d.gender !== gender) return false;
+                if (ageGroup && getAgeGroup(d.age) !== ageGroup) return false;
+                return true;
+            });
+
+            // Use setTimeout to prevent rapid re-renders
+            setTimeout(() => {
+                renderDashboard();
+            }, 100);
+        }
+
+        function exportToCSV() {
+            const headers = ['Date','HN','Company','Age','Gender','Weight','Hand Grip','Level','Leg Strength','Level','Back Strength','Level','Flexibility','Level'];
+            const rows = filteredData.map(d => [
+                d.date, d.hn, d.company || '-', d.age, d.gender === 'male' ? 'Male' : 'Female', d.weight,
+                d.measurements.handgrip, d.results.handgrip.level,
+                d.measurements.legstrength, d.results.legstrength.level,
+                d.measurements.backstrength, d.results.backstrength.level,
+                d.measurements.flexibility, d.results.flexibility.level
+            ]);
+            const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+            const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `fitness_report_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // Manual refresh function
+        function manualRefresh() {
+            const statusEl = document.getElementById('refreshStatus');
+            statusEl.innerHTML = '⏳ Loading...';
+            statusEl.style.color = '#3498db';
+
+            const previousDataLength = allData.length;
+
+            if (window.location.protocol === 'file:') {
+                // File mode - reload data.js dynamically (now using var instead of const)
+                const oldScript = document.querySelector('script[src*="data.js"]');
+                if (oldScript && oldScript.parentNode) {
+                    oldScript.parentNode.removeChild(oldScript);
+                }
+
+                const script = document.createElement('script');
+                script.src = 'data.js?t=' + Date.now();
+                script.onload = () => {
+                    if (typeof FITNESS_TEST_DATA !== 'undefined') {
+                        allData = FITNESS_TEST_DATA;
+                        filteredData = [...allData];
+                        dataLoaded = false;
+                        renderDashboard();
+
+                        const newCount = allData.length - previousDataLength;
+                        if (newCount > 0) {
+                            statusEl.innerHTML = `✅ Updated! +${newCount} new record${newCount > 1 ? 's' : ''}`;
+                            statusEl.style.color = '#27ae60';
+                        } else if (newCount < 0) {
+                            statusEl.innerHTML = `✅ Refreshed! ${allData.length} total records`;
+                            statusEl.style.color = '#3498db';
+                        } else {
+                            statusEl.innerHTML = '✅ No new data';
+                            statusEl.style.color = '#95a5a6';
+                        }
+
+                        setTimeout(() => {
+                            statusEl.innerHTML = '';
+                        }, 3000);
+
+                        console.log('Data refreshed (file mode):', allData.length, 'records');
+                    }
+                };
+                script.onerror = () => {
+                    console.error('Failed to load data.js');
+                    statusEl.innerHTML = '❌ Error loading data';
+                    statusEl.style.color = '#e74c3c';
+                    setTimeout(() => {
+                        statusEl.innerHTML = '';
+                    }, 3000);
+                };
+
+                document.head.appendChild(script);
+            } else {
+                // Server mode - fetch data.json
+                fetch('data.json?t=' + Date.now())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load data');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        allData = data;
+                        filteredData = [...allData];
+                        dataLoaded = false;
+                        renderDashboard();
+
+                        const newCount = allData.length - previousDataLength;
+                        if (newCount > 0) {
+                            statusEl.innerHTML = `✅ Updated! +${newCount} new record${newCount > 1 ? 's' : ''}`;
+                            statusEl.style.color = '#27ae60';
+                        } else if (newCount < 0) {
+                            statusEl.innerHTML = `✅ Refreshed! ${allData.length} total records`;
+                            statusEl.style.color = '#3498db';
+                        } else {
+                            statusEl.innerHTML = '✅ No new data';
+                            statusEl.style.color = '#95a5a6';
+                        }
+
+                        setTimeout(() => {
+                            statusEl.innerHTML = '';
+                        }, 3000);
+
+                        console.log('Data refreshed (server mode):', allData.length, 'records');
+                    })
+                    .catch(err => {
+                        console.error('Refresh error:', err);
+                        statusEl.innerHTML = '❌ Error loading data';
+                        statusEl.style.color = '#e74c3c';
+
+                        setTimeout(() => {
+                            statusEl.innerHTML = '';
+                        }, 3000);
+                    });
+            }
+        }
+
+        // Print Charts function
+        function printCharts() {
+            // Hide everything except charts section
+            const header = document.querySelector('.header');
+            const stats = document.querySelector('.stats-grid');
+            const filters = document.querySelector('.filters');
+            const table = document.getElementById('tableSection');
+            const footer = document.querySelector('.footer');
+
+            // Store original display values
+            const originalDisplays = {
+                header: header.style.display,
+                stats: stats.style.display,
+                filters: filters.style.display,
+                table: table.style.display,
+                footer: footer.style.display
+            };
+
+            // Hide non-chart elements
+            header.style.display = 'none';
+            stats.style.display = 'none';
+            filters.style.display = 'none';
+            table.style.display = 'none';
+            footer.style.display = 'none';
+
+            // Store original chart settings and prepare for print
+            const allCanvases = document.querySelectorAll('.chart-container canvas');
+            const allContainers = document.querySelectorAll('.chart-container');
+            const originalStyles = [];
+
+            allCanvases.forEach((canvas, index) => {
+                originalStyles[index] = {
+                    width: canvas.style.width,
+                    height: canvas.style.height,
+                    maxWidth: canvas.style.maxWidth,
+                    maxHeight: canvas.style.maxHeight
+                };
+            });
+
+            // Set containers to maintain aspect ratio
+            allContainers.forEach(container => {
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
+            });
+
+            // Add print header
+            const printTitle = document.createElement('div');
+            printTitle.id = 'printTitle';
+            printTitle.innerHTML = `
+                <div style="text-align: center; padding: 20px 15px; border-bottom: 3px solid #3498db; margin-bottom: 15px; background: #f8f9fa;">
+                    <h1 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.8em;">Physical Fitness Analytics Report</h1>
+                    <h3 style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 1.1em; font-weight: normal;">โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</h3>
+                    <p style="margin: 0; color: #95a5a6; font-size: 0.9em;">Charts Summary - ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p style="margin: 5px 0 0 0; color: #3498db; font-size: 0.9em; font-weight: 600;">Total Records: ${allData.length} | Filtered: ${filteredData.length}</p>
+                </div>
+            `;
+            document.querySelector('.container').insertBefore(printTitle, document.getElementById('chartsSection'));
+
+            // Force re-render charts for print quality with aspect ratio and enhanced labels
+            Object.values(charts).forEach((chart, index) => {
+                if (chart && chart.options) {
+                    // Temporarily enable maintainAspectRatio for print
+                    chart.options.maintainAspectRatio = true;
+                    chart.options.aspectRatio = 1.8; // Width to height ratio
+
+                    // Enhance datalabels for print
+                    if (chart.options.plugins && chart.options.plugins.datalabels) {
+                        chart.options.plugins.datalabels.display = true;
+                        chart.options.plugins.datalabels.color = '#000';
+                        chart.options.plugins.datalabels.font = {
+                            size: 14,
+                            weight: 'bold'
+                        };
+                        chart.options.plugins.datalabels.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        chart.options.plugins.datalabels.borderRadius = 3;
+                        chart.options.plugins.datalabels.padding = 4;
+
+                        console.log(`Chart ${index} datalabels config:`, {
+                            display: chart.options.plugins.datalabels.display,
+                            color: chart.options.plugins.datalabels.color,
+                            fontSize: chart.options.plugins.datalabels.font.size
+                        });
+                    } else {
+                        console.warn(`Chart ${index} has no datalabels plugin configuration`);
+                    }
+
+                    // Force full update with animation to ensure labels render
+                    if (chart.resize) chart.resize();
+                    if (chart.update) {
+                        chart.update('active'); // Use 'active' mode for full re-render
+                    }
+                }
+            });
+
+            // Wait longer for charts to fully re-render with labels, then print
+            setTimeout(() => {
+                console.log('Printing with data labels enabled...');
+                window.print();
+            }, 800);
+
+            // Restore original display after print dialog closes
+            setTimeout(() => {
+                header.style.display = originalDisplays.header;
+                stats.style.display = originalDisplays.stats;
+                filters.style.display = originalDisplays.filters;
+                table.style.display = originalDisplays.table;
+                footer.style.display = originalDisplays.footer;
+
+                // Restore canvas styles
+                allCanvases.forEach((canvas, index) => {
+                    if (originalStyles[index]) {
+                        canvas.style.width = originalStyles[index].width;
+                        canvas.style.height = originalStyles[index].height;
+                        canvas.style.maxWidth = originalStyles[index].maxWidth;
+                        canvas.style.maxHeight = originalStyles[index].maxHeight;
+                    }
+                });
+
+                // Restore container styles
+                allContainers.forEach(container => {
+                    container.style.display = '';
+                    container.style.alignItems = '';
+                    container.style.justifyContent = '';
+                });
+
+                // Remove print title
+                const titleEl = document.getElementById('printTitle');
+                if (titleEl) titleEl.remove();
+
+                // Force charts update back to normal and restore datalabels
+                Object.values(charts).forEach(chart => {
+                    if (chart && chart.options) {
+                        chart.options.maintainAspectRatio = false;
+                        delete chart.options.aspectRatio;
+
+                        // Restore original datalabels settings
+                        if (chart.options.plugins && chart.options.plugins.datalabels) {
+                            // Reset to screen display settings
+                            delete chart.options.plugins.datalabels.backgroundColor;
+                            delete chart.options.plugins.datalabels.borderRadius;
+                            delete chart.options.plugins.datalabels.padding;
+                        }
+
+                        if (chart.resize) chart.resize();
+                        if (chart.update) chart.update('none');
+                    }
+                });
+            }, 1000);
+        }
+
+        // Print Table function
+        function printTable() {
+            // Hide everything except table section
+            const header = document.querySelector('.header');
+            const stats = document.querySelector('.stats-grid');
+            const filters = document.querySelector('.filters');
+            const charts = document.getElementById('chartsSection');
+            const footer = document.querySelector('.footer');
+
+            // Store original display values
+            const originalDisplays = {
+                header: header.style.display,
+                stats: stats.style.display,
+                filters: filters.style.display,
+                charts: charts.style.display,
+                footer: footer.style.display
+            };
+
+            // Hide non-table elements
+            header.style.display = 'none';
+            stats.style.display = 'none';
+            filters.style.display = 'none';
+            charts.style.display = 'none';
+            footer.style.display = 'none';
+
+            // Add print header
+            const printTitle = document.createElement('div');
+            printTitle.id = 'printTitle';
+            printTitle.innerHTML = `
+                <div style="text-align: center; padding: 20px 15px; border-bottom: 3px solid #16a085; margin-bottom: 15px;">
+                    <h1 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.8em;">Physical Fitness Test Results</h1>
+                    <h3 style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 1.1em; font-weight: normal;">โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</h3>
+                    <p style="margin: 0; color: #95a5a6; font-size: 0.9em;">Detailed Summary - ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p style="margin: 5px 0 0 0; color: #16a085; font-size: 0.9em; font-weight: 600;">Total Records: ${allData.length} | Filtered: ${filteredData.length}</p>
+                </div>
+            `;
+            document.querySelector('.container').insertBefore(printTitle, document.getElementById('tableSection'));
+
+            // Wait a bit for rendering then print
+            setTimeout(() => {
+                window.print();
+            }, 100);
+
+            // Restore original display after print dialog closes
+            setTimeout(() => {
+                header.style.display = originalDisplays.header;
+                stats.style.display = originalDisplays.stats;
+                filters.style.display = originalDisplays.filters;
+                charts.style.display = originalDisplays.charts;
+                footer.style.display = originalDisplays.footer;
+
+                // Remove print title
+                const titleEl = document.getElementById('printTitle');
+                if (titleEl) titleEl.remove();
+            }, 500);
+        }
+
+        // Initialize only once
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadData();
+            });
+        } else {
+            loadData();
+        }
+    </script>
+</body>
+</html>

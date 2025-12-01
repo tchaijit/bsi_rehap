@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Plugin</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+    <canvas id="test" width="400" height="400"></canvas>
+    <script>
+        console.log('Chart:', typeof Chart);
+        console.log('ChartDataLabels:', typeof ChartDataLabels);
+        console.log('window.ChartDataLabels:', typeof window.ChartDataLabels);
+        console.log('All window properties with "data":', Object.keys(window).filter(k => k.toLowerCase().includes('data')));
+
+        // Try to create a simple chart with datalabels
+        const ctx = document.getElementById('test').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['A', 'B'],
+                datasets: [{
+                    label: 'Test',
+                    data: [10, 20],
+                    backgroundColor: 'blue'
+                }]
+            },
+            options: {
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        color: 'white',
+                        font: { size: 20, weight: 'bold' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
