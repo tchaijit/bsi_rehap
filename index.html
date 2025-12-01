@@ -412,6 +412,12 @@
                     <button type="submit" class="btn">สร้างรายงานผล PDF</button>
                     <button type="button" class="btn" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);" onclick="generateCleanReport()">Clean Report (ไม่มีโลโก้)</button>
                 </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button type="button" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);" onclick="window.open('pdf/report/dashboard.html', '_blank')">
+                        📊 เปิด Dashboard วิเคราะห์ผล
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -758,8 +764,53 @@
             }
         }
 
+        async function saveTestData(formData, results) {
+            try {
+                const testData = {
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString('th-TH'),
+                    hn: formData.hn,
+                    age: formData.age,
+                    gender: formData.gender,
+                    weight: formData.weight,
+                    measurements: {
+                        handgrip: formData.handgrip,
+                        legstrength: formData.legstrength,
+                        backstrength: formData.backstrength,
+                        flexibility: formData.flexibility,
+                        pushup: formData.pushup || null
+                    },
+                    results: {
+                        handgrip: results.handgrip,
+                        legstrength: results.legstrength,
+                        backstrength: results.backstrength,
+                        flexibility: results.flexibility,
+                        pushup: results.pushup || null
+                    }
+                };
+
+                // Send data to server endpoint (you need to create this PHP endpoint)
+                const response = await fetch('save_test_data.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (!response.ok) {
+                    console.warn('Failed to save test data to server');
+                }
+            } catch (error) {
+                console.warn('Error saving test data:', error);
+            }
+        }
+
         async function downloadPDF() {
             try {
+                // Save test data first
+                await saveTestData(currentFormData, currentResults);
+
                 // Wait longer for QR codes to fully render
                 await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -767,7 +818,7 @@
 
                 // Use html2canvas to capture the preview as image first
                 const canvas = await html2canvas(element, {
-                    scale: 3,
+                    scale: 1.5,
                     useCORS: true,
                     allowTaint: true,
                     logging: false,
@@ -792,11 +843,11 @@
                     orientation: 'portrait',
                     unit: 'mm',
                     format: 'a4',
-                    compress: false
+                    compress: true
                 });
 
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                pdf.addImage(imgData, 'PNG', marginLeft, 10, imgWidth, imgHeight);
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                pdf.addImage(imgData, 'JPEG', marginLeft, 10, imgWidth, imgHeight);
 
                 // Get PDF as blob
                 const pdfBlob = pdf.output('blob');
@@ -891,8 +942,8 @@
             qrHandGrip.innerHTML = '';
             new QRCode(qrHandGrip, {
                 text: "https://bdmsgroup-my.sharepoint.com/:b:/r/personal/tawatchai_ch_bdms_co_th/Documents/BSI/Rehap/%E0%B9%81%E0%B8%A3%E0%B8%87%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD.pdf?csf=1&web=1&e=GZtcn7",
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L
@@ -902,8 +953,8 @@
             qrHealthCheck.innerHTML = '';
             new QRCode(qrHealthCheck, {
                 text: "https://bdmsgroup-my.sharepoint.com/:b:/g/personal/tawatchai_ch_bdms_co_th/EfZ3JgjI60dAjXJKe8dCXoIBglbJomYxLsPx-0S6hOB-eA?e=1C0DWT",
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L
@@ -970,8 +1021,8 @@
             qrHandGrip.innerHTML = '';
             new QRCode(qrHandGrip, {
                 text: "https://bdmsgroup-my.sharepoint.com/:b:/r/personal/tawatchai_ch_bdms_co_th/Documents/BSI/Rehap/%E0%B9%81%E0%B8%A3%E0%B8%87%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD.pdf?csf=1&web=1&e=GZtcn7",
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L
@@ -981,8 +1032,8 @@
             qrHealthCheck.innerHTML = '';
             new QRCode(qrHealthCheck, {
                 text: "https://bdmsgroup-my.sharepoint.com/:b:/g/personal/tawatchai_ch_bdms_co_th/EfZ3JgjI60dAjXJKe8dCXoIBglbJomYxLsPx-0S6hOB-eA?e=1C0DWT",
-                width: 100,
-                height: 100,
+                width: 80,
+                height: 80,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L
