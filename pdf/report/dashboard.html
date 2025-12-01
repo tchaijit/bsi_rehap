@@ -18,6 +18,80 @@
             padding: 15px;
             color: #2c3e50;
         }
+        /* Passkey Login Overlay */
+        #passkeyOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        #passkeyBox {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        #passkeyBox h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        #passkeyBox p {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+        #passkeyInput {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: 'Noto Sans Thai', Arial, sans-serif;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        #passkeyInput:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        #passkeySubmit {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-family: 'Noto Sans Thai', Arial, sans-serif;
+        }
+        #passkeySubmit:hover {
+            background: #2980b9;
+        }
+        #passkeyError {
+            color: #e74c3c;
+            font-size: 0.85em;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        .dashboard-content {
+            display: none;
+        }
+        .dashboard-content.unlocked {
+            display: block;
+        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -332,6 +406,19 @@
     </style>
 </head>
 <body>
+    <!-- Passkey Login Overlay -->
+    <div id="passkeyOverlay">
+        <div id="passkeyBox">
+            <h2>🔒 Dashboard Access</h2>
+            <p>กรุณาใส่รหัสผ่านเพื่อเข้าถึง Dashboard</p>
+            <input type="password" id="passkeyInput" placeholder="Enter passkey" autocomplete="off">
+            <button id="passkeySubmit" onclick="checkPasskey()">Unlock</button>
+            <div id="passkeyError"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content (Hidden until unlocked) -->
+    <div class="dashboard-content">
     <div class="container">
         <div class="header">
             <h1>Physical Fitness Analytics Dashboard</h1>
@@ -398,6 +485,7 @@
             <button class="btn btn-export" onclick="exportToCSV()">Export CSV</button>
             <button class="btn" onclick="printCharts()" style="background: #9b59b6;">🖨️ Print Charts</button>
             <button class="btn" onclick="printTable()" style="background: #16a085;">🖨️ Print Table</button>
+            <button class="btn" onclick="printAll()" style="background: #e67e22;">🖨️ Print All</button>
         </div>
 
         <div class="charts-section" id="chartsSection">
@@ -1260,10 +1348,16 @@
             // Add print header
             const printTitle = document.createElement('div');
             printTitle.id = 'printTitle';
+
+            // Get company filter value
+            const companyFilter = document.getElementById('filterCompany').value;
+            const companyText = companyFilter ? `<p style="margin: 5px 0 0 0; color: #e67e22; font-size: 1.1em; font-weight: 700;">บริษัท: ${companyFilter}</p>` : '';
+
             printTitle.innerHTML = `
                 <div style="text-align: center; padding: 20px 15px; border-bottom: 3px solid #3498db; margin-bottom: 15px; background: #f8f9fa;">
                     <h1 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.8em;">Physical Fitness Analytics Report</h1>
                     <h3 style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 1.1em; font-weight: normal;">โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</h3>
+                    ${companyText}
                     <p style="margin: 0; color: #95a5a6; font-size: 0.9em;">Charts Summary - ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     <p style="margin: 5px 0 0 0; color: #3498db; font-size: 0.9em; font-weight: 600;">Total Records: ${allData.length} | Filtered: ${filteredData.length}</p>
                 </div>
@@ -1390,10 +1484,16 @@
             // Add print header
             const printTitle = document.createElement('div');
             printTitle.id = 'printTitle';
+
+            // Get company filter value
+            const companyFilter = document.getElementById('filterCompany').value;
+            const companyText = companyFilter ? `<p style="margin: 5px 0 0 0; color: #e67e22; font-size: 1.1em; font-weight: 700;">บริษัท: ${companyFilter}</p>` : '';
+
             printTitle.innerHTML = `
                 <div style="text-align: center; padding: 20px 15px; border-bottom: 3px solid #16a085; margin-bottom: 15px;">
                     <h1 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.8em;">Physical Fitness Test Results</h1>
                     <h3 style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 1.1em; font-weight: normal;">โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</h3>
+                    ${companyText}
                     <p style="margin: 0; color: #95a5a6; font-size: 0.9em;">Detailed Summary - ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     <p style="margin: 5px 0 0 0; color: #16a085; font-size: 0.9em; font-weight: 600;">Total Records: ${allData.length} | Filtered: ${filteredData.length}</p>
                 </div>
@@ -1419,14 +1519,159 @@
             }, 500);
         }
 
-        // Initialize only once
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                loadData();
+        // Print All (Charts + Table) function
+        function printAll() {
+            // Hide only header, stats, filters, and footer
+            const header = document.querySelector('.header');
+            const stats = document.querySelector('.stats-grid');
+            const filters = document.querySelector('.filters');
+            const footer = document.querySelector('.footer');
+
+            // Store original display values
+            const originalDisplays = {
+                header: header.style.display,
+                stats: stats.style.display,
+                filters: filters.style.display,
+                footer: footer.style.display
+            };
+
+            // Hide non-content elements
+            header.style.display = 'none';
+            stats.style.display = 'none';
+            filters.style.display = 'none';
+            footer.style.display = 'none';
+
+            // Get company filter value
+            const companyFilter = document.getElementById('filterCompany').value;
+            const companyText = companyFilter ? `<p style="margin: 5px 0 0 0; color: #e67e22; font-size: 1.1em; font-weight: 700;">บริษัท: ${companyFilter}</p>` : '';
+
+            // Add print header
+            const printTitle = document.createElement('div');
+            printTitle.id = 'printTitle';
+            printTitle.innerHTML = `
+                <div style="text-align: center; padding: 20px 15px; border-bottom: 3px solid #e67e22; margin-bottom: 15px; background: #f8f9fa;">
+                    <h1 style="margin: 0 0 5px 0; color: #2c3e50; font-size: 1.8em;">Physical Fitness Complete Report</h1>
+                    <h3 style="margin: 0 0 5px 0; color: #7f8c8d; font-size: 1.1em; font-weight: normal;">โรงพยาบาลกรุงเทพสิริโรจน์ | Bangkok Hospital Siriroj</h3>
+                    ${companyText}
+                    <p style="margin: 0; color: #95a5a6; font-size: 0.9em;">Complete Report - ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p style="margin: 5px 0 0 0; color: #e67e22; font-size: 0.9em; font-weight: 600;">Total Records: ${allData.length} | Filtered: ${filteredData.length}</p>
+                </div>
+            `;
+            document.querySelector('.container').insertBefore(printTitle, document.getElementById('chartsSection'));
+
+            // Add section divider between charts and table
+            const sectionDivider = document.createElement('div');
+            sectionDivider.id = 'sectionDivider';
+            sectionDivider.innerHTML = `
+                <div style="page-break-before: always; margin: 30px 0 20px 0; padding: 15px; background: #ecf0f1; border-left: 5px solid #e67e22;">
+                    <h2 style="margin: 0; color: #2c3e50; font-size: 1.3em;">📊 Detailed Test Results</h2>
+                    <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9em;">รายละเอียดผลการทดสอบแต่ละรายการ</p>
+                </div>
+            `;
+            document.querySelector('.container').insertBefore(sectionDivider, document.getElementById('tableSection'));
+
+            // Enhance charts for print
+            const allCanvases = document.querySelectorAll('.chart-container canvas');
+            const allContainers = document.querySelectorAll('.chart-container');
+
+            // Set containers to maintain aspect ratio
+            allContainers.forEach(container => {
+                container.style.display = 'flex';
+                container.style.alignItems = 'center';
+                container.style.justifyContent = 'center';
             });
-        } else {
-            loadData();
+
+            // Force re-render charts
+            Object.values(charts).forEach((chart) => {
+                if (chart && chart.options) {
+                    chart.options.maintainAspectRatio = true;
+                    chart.options.aspectRatio = 1.8;
+
+                    if (chart.options.plugins && chart.options.plugins.datalabels) {
+                        chart.options.plugins.datalabels.display = true;
+                        chart.options.plugins.datalabels.color = '#000';
+                        chart.options.plugins.datalabels.font = { size: 14, weight: 'bold' };
+                        chart.options.plugins.datalabels.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        chart.options.plugins.datalabels.borderRadius = 3;
+                        chart.options.plugins.datalabels.padding = 4;
+                    }
+
+                    if (chart.resize) chart.resize();
+                    if (chart.update) chart.update('active');
+                }
+            });
+
+            // Wait for rendering then print
+            setTimeout(() => {
+                window.print();
+            }, 500);
+
+            // Restore original display after print dialog closes
+            setTimeout(() => {
+                header.style.display = originalDisplays.header;
+                stats.style.display = originalDisplays.stats;
+                filters.style.display = originalDisplays.filters;
+                footer.style.display = originalDisplays.footer;
+
+                // Remove print elements
+                const titleEl = document.getElementById('printTitle');
+                if (titleEl) titleEl.remove();
+                const dividerEl = document.getElementById('sectionDivider');
+                if (dividerEl) dividerEl.remove();
+
+                // Restore chart settings
+                Object.values(charts).forEach((chart) => {
+                    if (chart && chart.options) {
+                        chart.options.maintainAspectRatio = false;
+                        if (chart.resize) chart.resize();
+                        if (chart.update) chart.update('none');
+                    }
+                });
+            }, 1000);
         }
+
+        // Passkey Protection
+        const CORRECT_PASSKEY = 'Rehab@bsi888';
+
+        function checkPasskey() {
+            const input = document.getElementById('passkeyInput');
+            const errorEl = document.getElementById('passkeyError');
+            const enteredKey = input.value;
+
+            if (enteredKey === CORRECT_PASSKEY) {
+                // Correct passkey - unlock dashboard
+                document.getElementById('passkeyOverlay').style.display = 'none';
+                document.querySelector('.dashboard-content').classList.add('unlocked');
+
+                // Load data after successful unlock
+                loadData();
+            } else {
+                // Wrong passkey - show error
+                errorEl.textContent = '❌ รหัสผ่านไม่ถูกต้อง / Incorrect passkey';
+                input.value = '';
+                input.focus();
+
+                // Clear error after 3 seconds
+                setTimeout(() => {
+                    errorEl.textContent = '';
+                }, 3000);
+            }
+        }
+
+        // Allow Enter key to submit passkey
+        document.addEventListener('DOMContentLoaded', () => {
+            const passkeyInput = document.getElementById('passkeyInput');
+            if (passkeyInput) {
+                passkeyInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        checkPasskey();
+                    }
+                });
+                // Auto-focus the input field
+                passkeyInput.focus();
+            }
+        });
     </script>
+    </div> <!-- Close dashboard-content -->
 </body>
 </html>
