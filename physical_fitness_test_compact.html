@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical Fitness Test - Compact PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div id="pdf-content" style="width: 180mm; margin: 0 auto; padding: 3mm; font-family: Arial, sans-serif; font-size: 10px;">
+        <!-- Header - Very Compact -->
+        <div style="text-align: center; margin-bottom: 2mm; border-bottom: 1px solid #667eea; padding-bottom: 1mm;">
+            <h1 style="color: #667eea; font-size: 14px; margin: 0;">รายงานสมรรถภาพทางกาย</h1>
+            <div style="font-size: 9px; color: #666;">โรงพยาบาลกรุงเทพสิริโรจน์</div>
+        </div>
+
+        <!-- Personal Info - Compact Table -->
+        <table style="width: 100%; font-size: 9px; margin-bottom: 2mm;">
+            <tr>
+                <td style="padding: 1px;"><b>HN:</b> 9999</td>
+                <td style="padding: 1px;"><b>อายุ:</b> 45 ปี</td>
+                <td style="padding: 1px;"><b>เพศ:</b> ชาย</td>
+                <td style="padding: 1px;"><b>น้ำหนัก:</b> 70 กก.</td>
+            </tr>
+        </table>
+
+        <!-- Test Results - Very Compact -->
+        <table style="width: 100%; font-size: 9px; border-collapse: collapse; margin-bottom: 2mm;">
+            <tr style="background: #f0f0f0;">
+                <th style="padding: 2px; text-align: left;">ทดสอบ</th>
+                <th style="padding: 2px; text-align: right;">ค่า</th>
+                <th style="padding: 2px; text-align: center;">ผล</th>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">กำลังมือ</td>
+                <td style="padding: 2px; text-align: right;">42.50 kg</td>
+                <td style="padding: 2px; text-align: center; background: #ffc107;">ปานกลาง</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">กำลังขา</td>
+                <td style="padding: 2px; text-align: right;">95.00 kg</td>
+                <td style="padding: 2px; text-align: center; background: #ffc107;">ปานกลาง</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">กำลังหลัง</td>
+                <td style="padding: 2px; text-align: right;">90.00 kg</td>
+                <td style="padding: 2px; text-align: center; background: #ffc107;">ปานกลาง</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">ความยืดหยุ่น</td>
+                <td style="padding: 2px; text-align: right;">8.50 cm</td>
+                <td style="padding: 2px; text-align: center; background: #ffc107;">ปานกลาง</td>
+            </tr>
+        </table>
+
+        <!-- Summary -->
+        <div style="background: #e3f2fd; padding: 2mm; margin-bottom: 2mm; font-size: 9px; font-weight: bold;">
+            สมรรถภาพโดยรวม: ควรปรับปรุง
+        </div>
+
+        <!-- QR Codes - Side by Side -->
+        <div style="text-align: center; margin-top: 2mm;">
+            <h3 style="font-size: 10px; margin: 1mm 0; color: #667eea;">ขั้นตอนต่อไป</h3>
+            <div style="display: flex; justify-content: space-around; margin-top: 1mm;">
+                <div style="text-align: center;">
+                    <p style="font-size: 8px; margin: 0;">แรงบีบมือ</p>
+                    <div id="qr1" style="margin: 1mm auto;"></div>
+                </div>
+                <div style="text-align: center;">
+                    <p style="font-size: 8px; margin: 0;">ตรวจสี่อย่าง</p>
+                    <div id="qr2" style="margin: 1mm auto;"></div>
+                </div>
+            </div>
+            <p style="font-size: 7px; margin-top: 1mm; color: #666;">โรงพยาบาลกรุงเทพสิริโรจน์ | Tel: +66 76 361 888</p>
+        </div>
+    </div>
+
+    <button onclick="generatePDF()" style="margin: 20px; padding: 15px 30px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">Download PDF</button>
+
+    <script>
+        // Generate QR Codes
+        setTimeout(() => {
+            new QRCode(document.getElementById("qr1"), {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/r/personal/tawatchai_ch_bdms_co_th/Documents/BSI/Rehap/%E0%B9%81%E0%B8%A3%E0%B8%87%E0%B8%9A%E0%B8%B5%E0%B8%9A%E0%B8%A1%E0%B8%B7%E0%B8%AD.pdf?csf=1&web=1&e=GZtcn7",
+                width: 50,
+                height: 50,
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            new QRCode(document.getElementById("qr2"), {
+                text: "https://bdmsgroup-my.sharepoint.com/:b:/g/personal/tawatchai_ch_bdms_co_th/EfZ3JgjI60dAjXJKe8dCXoIBglbJomYxLsPx-0S6hOB-eA?e=1C0DWT",
+                width: 50,
+                height: 50,
+                correctLevel: QRCode.CorrectLevel.L
+            });
+        }, 500);
+
+        async function generatePDF() {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const element = document.getElementById('pdf-content');
+            const opt = {
+                margin: [3, 3, 3, 3],
+                filename: 'fitness_test_compact.pdf',
+                image: { type: 'jpeg', quality: 0.80 },
+                html2canvas: {
+                    scale: 1.5,
+                    logging: false,
+                    useCORS: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    compress: true
+                }
+            };
+
+            await html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
